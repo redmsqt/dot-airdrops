@@ -9,6 +9,7 @@ const VDOT_ID = 15;
 const OMNIPOOL_COLLECTION_ID = 1337;
 const LM_COLLECTION_ID = 2584;
 const OMNIPOOL_ADDRESS = "7L53bUTBbfuj14UpdCNPwmgzzHSsrsTWBHX5pys32mVWM3C1";
+const FARM_ADDRESS = "7L53bUT5Bn9vMEubRo1e9xZefRgbPSccgzxejvSfBpwed6Qv";
 const TREASURY_ADDRESS = "7L53bUTBopuwFt3mKUfmkzgGLayYa1Yvn1hAg9v5UMrQzTfh";
 
 const rpc = "wss://rpc.hydradx.cloud";
