@@ -1,0 +1,17 @@
+{
+  "name": "dot-airdrops",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "type": "module",
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@galacticcouncil/math-omnipool": "^0.2.0",
+    "@polkadot/api": "^10.12.4",
+    "bignumber.js": "^9.1.2"
+  }
+}
