@@ -132,6 +132,7 @@ async function main() {
         {}
       )
     );
+
   const lmPositionOwners = {};
   (await apiAt.query.uniques.asset.entries(LM_COLLECTION_ID)).forEach(
     (owner) => {
@@ -148,10 +149,28 @@ async function main() {
       const owner = lmPositionOwners[lmPositions[id]] || positionOwners[id];
       return mapPositions(position, owner, omnipoolDotData, omnipoolDot);
     });
+
+  const treasuryDotPosition = dotPositions.reduce((acc, position) => {
+    return acc.minus(position.underlyingAmount);
+  }, BigNumber(omnipoolDot).dividedBy(10 ** DECIMALS));
+
+  console.log(
+    "treasury DOT unallocated position",
+    treasuryDotPosition.toNumber()
+  );
+  dotPositions.push({
+    id: "0",
+    owner: TREASURY_ADDRESS,
+    originalAmount: "0",
+    shares: "0",
+    originalPrice: ["0", "0"],
+    underlyingAmount: treasuryDotPosition.toString(),
+  });
+
   console.log(
     BigNumber(omnipoolDot)
       .dividedBy(10 ** DECIMALS)
-      .toString(),
+      .toNumber(),
     "DOT locked in",
     dotPositions.length,
     "dot positions"
@@ -171,10 +190,28 @@ async function main() {
       const owner = lmPositionOwners[lmPositions[id]] || positionOwners[id];
       return mapPositions(position, owner, omnipoolVdotData, omnipoolVdot);
     });
+
+  const treasuryVdotPosition = vdotPositions.reduce((acc, position) => {
+    return acc.minus(position.underlyingAmount);
+  }, BigNumber(omnipoolVdot).dividedBy(10 ** DECIMALS));
+
+  console.log(
+    "treasury vDOT unallocated position",
+    treasuryVdotPosition.toNumber()
+  );
+  vdotPositions.push({
+    id: "0",
+    owner: TREASURY_ADDRESS,
+    originalAmount: "0",
+    shares: "0",
+    originalPrice: ["0", "0"],
+    underlyingAmount: treasuryVdotPosition.toString(),
+  });
+
   console.log(
     BigNumber(omnipoolVdot)
       .dividedBy(10 ** DECIMALS)
-      .toString(),
+      .toNumber(),
     "vDOT locked in",
     vdotPositions.length,
     "vdot positions"
@@ -230,14 +267,14 @@ function mapHolders(tokenHolder) {
     address: tokenHolder[0].toHuman()[0],
     freeBalance: BigNumber(tokenHolder[1].free)
       .dividedBy(10 ** DECIMALS)
-      .toString(), // Yield DCA
+      .toString(),
     reservedBalance: BigNumber(tokenHolder[1].reserved)
       .dividedBy(10 ** DECIMALS)
       .toString(), // Yield DCA
     totalBalance: BigNumber(tokenHolder[1].free)
       .plus(BigNumber(tokenHolder[1].reserved))
       .dividedBy(10 ** DECIMALS)
-      .toString(), // Yield DCA
+      .toString(),
   };
 }
 
