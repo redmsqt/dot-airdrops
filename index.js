@@ -7,6 +7,7 @@ const DECIMALS = 10;
 const DOT_ID = 5;
 const VDOT_ID = 15;
 const OMNIPOOL_COLLECTION_ID = 1337;
+const LM_COLLECTION_ID = 2584;
 const OMNIPOOL_ADDRESS = "7L53bUTBbfuj14UpdCNPwmgzzHSsrsTWBHX5pys32mVWM3C1";
 const TREASURY_ADDRESS = "7L53bUTBopuwFt3mKUfmkzgGLayYa1Yvn1hAg9v5UMrQzTfh";
 
@@ -113,14 +114,25 @@ async function main() {
     }
   );
 
+  const lmPositions = await apiAt.query.omnipoolLiquidityMining.omniPositionId.entries()
+    .then(p => p.reduce((acc, [{args: [k]}, v]) => ({...acc, [v.toHuman()]: k.toHuman()}), {}));
+  const lmPositionOwners = {};
+  (await apiAt.query.uniques.asset.entries(LM_COLLECTION_ID)).forEach(
+    (owner) => {
+      lmPositionOwners[owner[0].toHuman()[1]] = owner[1].toHuman().owner;
+    }
+  );
+
   const dotPositions = positions
     .filter((position) => {
       return position[1].toJSON().assetId === DOT_ID;
     })
     .map((position) => {
+      const id = position[0].toHuman()[0];
+      const owner = lmPositionOwners[lmPositions[id]] || positionOwners[id];
       return mapPositions(
         position,
-        positionOwners[position[0].toHuman()[0]],
+        owner,
         omnipoolDotData,
         omnipoolDot
       );
@@ -144,9 +156,11 @@ async function main() {
       return position[1].toJSON().assetId === VDOT_ID;
     })
     .map((position) => {
+      const id = position[0].toHuman()[0];
+      const owner = lmPositionOwners[lmPositions[id]] || positionOwners[id];
       return mapPositions(
         position,
-        positionOwners[position[0].toHuman()[0]],
+        owner,
         omnipoolVdotData,
         omnipoolVdot
       );
