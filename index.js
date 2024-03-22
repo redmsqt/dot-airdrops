@@ -22,7 +22,6 @@ async function main() {
     console.log(
       "please specify a block number after the command (e.g. node index.js 4700000)"
     );
-    process.exit(1);
   }
 
   fs.mkdirSync("data", { recursive: true });
@@ -31,10 +30,12 @@ async function main() {
   const wsProvider = new WsProvider(rpc);
   const api = await ApiPromise.create({ provider: wsProvider });
   const currentBlock = (await api.rpc.chain.getBlock()).block.header.number;
-  const blockHash = await api.rpc.chain.getBlockHash(block);
+  const blockHash = await api.rpc.chain.getBlockHash(block || currentBlock);
   const apiAt = await api.at(blockHash);
   console.log(
-    `connected, #${currentBlock} fetching token holders at #${block}...`
+    `connected, head at #${currentBlock}, fetching token holders at #${
+      block || currentBlock
+    }...`
   );
 
   // Yield DCA
@@ -115,8 +116,22 @@ async function main() {
     }
   );
 
-  const lmPositions = await apiAt.query.omnipoolLiquidityMining.omniPositionId.entries()
-    .then(p => p.reduce((acc, [{args: [k]}, v]) => ({...acc, [v.toHuman()]: k.toHuman()}), {}));
+  const lmPositions = await apiAt.query.omnipoolLiquidityMining.omniPositionId
+    .entries()
+    .then((p) =>
+      p.reduce(
+        (
+          acc,
+          [
+            {
+              args: [k],
+            },
+            v,
+          ]
+        ) => ({ ...acc, [v.toHuman()]: k.toHuman() }),
+        {}
+      )
+    );
   const lmPositionOwners = {};
   (await apiAt.query.uniques.asset.entries(LM_COLLECTION_ID)).forEach(
     (owner) => {
@@ -131,12 +146,7 @@ async function main() {
     .map((position) => {
       const id = position[0].toHuman()[0];
       const owner = lmPositionOwners[lmPositions[id]] || positionOwners[id];
-      return mapPositions(
-        position,
-        owner,
-        omnipoolDotData,
-        omnipoolDot
-      );
+      return mapPositions(position, owner, omnipoolDotData, omnipoolDot);
     });
   console.log(
     BigNumber(omnipoolDot)
@@ -159,12 +169,7 @@ async function main() {
     .map((position) => {
       const id = position[0].toHuman()[0];
       const owner = lmPositionOwners[lmPositions[id]] || positionOwners[id];
-      return mapPositions(
-        position,
-        owner,
-        omnipoolVdotData,
-        omnipoolVdot
-      );
+      return mapPositions(position, owner, omnipoolVdotData, omnipoolVdot);
     });
   console.log(
     BigNumber(omnipoolVdot)
